@@ -43,15 +43,23 @@ void Primary();
 void Empty();
 void lexAdv();
 
+/*
+ * TODO: We need to add our stacks and extra functions
+ */
 
 int                     lineNumber = 0;
 int                     tokenIndex = 0;             //Index used to step through token vector
-bool                    printSwitch = true;
+bool                    printSwitch = false;
 vector<tokenData>       tokens;                     //vector to hold tokens as they are being inputted
 vector<tokenData>       tokenList;                  //vector that holds all tokens once they have been read in initially
 tokenData               currentToken;
 ifstream			    ifget;
 ofstream				oftrace;
+
+int                     memoryAddress = 6000;
+stack<int>              theStack;
+stack<int>              jumpStack;
+
 
 
 int main() 
@@ -145,9 +153,9 @@ void Rat16F()
 			lexAdv();
 			OptDecList();
 			StatementList();
-			if (currentToken.lexeme == "$$")
-				oftrace << "The End.\n";
-			else
+			if (currentToken.lexeme != "$$")
+				//oftrace << "The End.\n";
+			//else
 			{
 				oftrace << "\n<><><> Syntax Error, expecting last '$$' before '" << currentToken.lexeme << "' on line " << currentToken.lineNumber;
 				exit(1);

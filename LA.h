@@ -12,6 +12,7 @@ Assignment 2 - Syntax Analyzer
 #include <vector>
 #include <cstdlib>
 #include <iomanip>
+#include <stack>
 using namespace std;
 
 
