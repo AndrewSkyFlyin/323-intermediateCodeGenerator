@@ -1,0 +1,22 @@
+$$
+function doSomething[number:true]
+real ram;
+{
+	read (num1);
+    return 109.92*(1+1) / 9;
+}
+function doThis[number:false]
+{
+	print (109 + num1);
+}
+$$
+
+    real num1, num2;
+	num1 := 7;
+    read(num1, num2);
+    if(num1 < num2)
+    {
+		print(num1);
+		print(doSomething[num1,num2]);
+    }endif
+$$
