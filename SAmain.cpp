@@ -7,7 +7,7 @@ Assignment 3 - Intermediate Code Generator
 */
 
 #include "LA.h"
-using namespace std;
+//using namespace std;
 
 
 void Rat16F();
@@ -45,23 +45,26 @@ void lexAdv();
 void generateInstruction(string opCode, int oprnd);
 void backPatch(int jumpAddress);
 
+// TODO: Write a function to see if a particular identifier is already in the table
+// TODO: Write a function to print out all identifiers in the table
 
 
 bool                        printSwitch = false;
 int                         lineNumber = 0;
-int                         tokenIndex = 0;             //Index used to step through token vector
+int                         tokenIndex = 0;                 //Index used to step through token vector
 tokenData                   currentToken;
-vector<tokenData>           tokens;                     //vector to hold tokens as they are being inputted
-vector<tokenData>           tokenList;                  //vector that holds all tokens once they have been read in initially
+vector<tokenData>           tokens;                         //vector to hold tokens as they are being inputted
+vector<tokenData>           tokenList;                      //vector that holds all tokens once they have been read in initially
 ifstream			        ifget;
 ofstream				    oftrace;
 
 // ICG Additions
-int                         memoryAddress = 6000;
-int                         tempInstructionNumber = 0;
-int                         currentInstructionNumber = 1;
+int                         memoryAddress = 6000;           // Physical memory address starts at 6000 and will get incremented when identifier gets placed in symbol table
+int                         tempInstructionNumber = 0;      // Temp place to hold the instruction number of an operation
+int                         currentInstructionNumber = 1;   // Instructions start from 1 and increment after instruction gets placed in instruction table
 stack<int>                  theStack;
-stack<int>                  jumpStack;
+stack<int>                  jumpStack;                      // TODO: Need to figure out the stack situation
+string                      tempSaveToken;
 vector<symbolData>          symbolTable;
 vector<instructionData>     instructionTable;
 
@@ -487,13 +490,13 @@ void Assign()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		save = token;                                               //*
+		tempSaveToken = currentToken.token;                         //*
 		lexAdv();
 		if (currentToken.lexeme == ":=")
 		{
 			lexAdv();
 			Expression();
-			tempInstructionNumber = get_address(save);              //*
+			tempInstructionNumber = get_address(tempSaveToken);     //* Do we need to check if tempSaveToken is in the symbol table already?
 			generateInstruction("POPM", tempInstructionNumber);     //*
 			if (currentToken.lexeme == ";")
 				lexAdv();
@@ -512,12 +515,14 @@ void Assign()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void If()
 {
 	if (printSwitch)
 		oftrace << "\t<If> ::= if (<Condition>) <Statement> endif | if (<Condition>) <Statement> else <Statement> endif\n";
 	if (currentToken.lexeme == "if")
 	{
+		tempInstructionNumber = currentInstructionNumber;
 		lexAdv();
 		if (currentToken.lexeme == "(")
 		{
@@ -527,6 +532,7 @@ void If()
 			{
 				lexAdv();
 				Statement();
+				backPatch(currentInstructionNumber);
 				if (currentToken.lexeme == "endif")
 				{
 					lexAdv();
@@ -684,6 +690,7 @@ void While()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void Condition()
 {
 	if (printSwitch)
@@ -692,9 +699,45 @@ void Condition()
 	Expression();
 	Relop();
 	Expression();
+
+	// TODO: Need to finish filling this out
+	if (tempSaveToken == "=")
+	{
+		generateInstruction("EQU", NULL);
+		jumpStack.push(currentInstructionNumber);
+		generateInstruction("JUMPZ", NULL);
+	}
+	else if (tempSaveToken == "/=" || tempSaveToken == "!=")
+	{
+		generateInstruction("NEQ", NULL);
+
+	}
+	else if (tempSaveToken == ">")
+	{
+		generateInstruction("GTR", NULL);
+		jumpStack.push(currentInstructionNumber);
+		generateInstruction("JUMPZ", NULL);
+	}
+	else if (tempSaveToken == "<")
+	{
+		generateInstruction("LES", NULL);
+		jumpStack.push(currentInstructionNumber);
+		generateInstruction("JUMPZ", NULL);
+	}
+	else if (tempSaveToken == "=>")
+	{
+		generateInstruction("GET", NULL);
+
+	}
+	else if (tempSaveToken == "<=")
+	{
+		generateInstruction("LET", NULL);
+
+	}
 }
 
 
+// *ADDED CODE FROM PROMPT
 void Relop()
 {
 	if (printSwitch)
@@ -703,6 +746,7 @@ void Relop()
 	if (currentToken.lexeme == "=" || currentToken.lexeme == "/=" || currentToken.lexeme == ">"
 		|| currentToken.lexeme == "<" || currentToken.lexeme == "=>" || currentToken.lexeme == "<=")
 	{
+		tempSaveToken = currentToken.token;
 		lexAdv();
 	}
 	else
@@ -828,7 +872,7 @@ void Primary()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		tempInstructionNumber = get_address(token);                 //*
+		tempInstructionNumber = get_address(currentToken);          //*
 		generateInstruction("PUSHM", tempInstructionNumber);        //*
 		lexAdv();
 		if (currentToken.lexeme == "[")
