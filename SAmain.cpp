@@ -2,7 +2,7 @@
 Andrew Nguyen
 Joshua Womack 
 CPSC323
-Assignment 2 - Syntax Analyzer
+Assignment 3 - Intermediate Code Generator
 
 */
 
