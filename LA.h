@@ -16,6 +16,21 @@ Assignment 3 - Intermediate Code Generator
 using namespace std;
 
 
+struct symbolData
+{
+	string  identifier;
+	int     memoryLocation;
+	string  dataType;
+};
+
+struct instructionData
+{
+	int     instructionNumber;
+	string  opCode;
+	int     memoryLocation;
+};
+
+
 //These will be placed inside the vector
 struct tokenData
 {
@@ -47,18 +62,6 @@ const int FSM_Digit_Table[5][2] = {
 	4, 4
 };
 
-struct symbolData
-{
-	string  lexeme;
-	int     memoryAddress;
-	string  type;
-};
-
-struct assemblyCode
-{
-	string  opCode;
-	int     memoryAddress;
-};
 
 //Reserved keyword list
 string keywords[13] = { "function", "integer", "boolean", "real", "if", "endif",

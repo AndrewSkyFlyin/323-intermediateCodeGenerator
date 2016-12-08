@@ -42,29 +42,33 @@ void Factor();
 void Primary();
 void Empty();
 void lexAdv();
+void generateInstruction(string opCode, int oprnd);
+void backPatch(int jumpAddress);
 
 
 
-int                     lineNumber = 0;
-int                     tokenIndex = 0;             //Index used to step through token vector
-bool                    printSwitch = false;
-vector<tokenData>       tokens;                     //vector to hold tokens as they are being inputted
-vector<tokenData>       tokenList;                  //vector that holds all tokens once they have been read in initially
-tokenData               currentToken;
-ifstream			    ifget;
-ofstream				oftrace;
+bool                        printSwitch = false;
+int                         lineNumber = 0;
+int                         tokenIndex = 0;             //Index used to step through token vector
+tokenData                   currentToken;
+vector<tokenData>           tokens;                     //vector to hold tokens as they are being inputted
+vector<tokenData>           tokenList;                  //vector that holds all tokens once they have been read in initially
+ifstream			        ifget;
+ofstream				    oftrace;
 
 // ICG Additions
-int                     memoryAddress = 6000;
-stack<int>              theStack;
-stack<int>              jumpStack;
-vector<symbolData>      symbolTable;
-vector<assemblyCode>    instructionList;
+int                         memoryAddress = 6000;
+int                         tempInstructionNumber = 0;
+int                         currentInstructionNumber = 1;
+stack<int>                  theStack;
+stack<int>                  jumpStack;
+vector<symbolData>          symbolTable;
+vector<instructionData>     instructionTable;
+
 
 
 int main() 
 {
-
 	LA                      lex;
 	string				    current = "";
 	string				    infilepath = "";
@@ -475,6 +479,7 @@ void Compound()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void Assign()
 {
 	if (printSwitch)
@@ -482,11 +487,14 @@ void Assign()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
+		save = token;                                               //*
 		lexAdv();
 		if (currentToken.lexeme == ":=")
 		{
 			lexAdv();
 			Expression();
+			tempInstructionNumber = get_address(save);              //*
+			generateInstruction("POPM", tempInstructionNumber);     //*
 			if (currentToken.lexeme == ";")
 				lexAdv();
 			else
@@ -652,11 +660,14 @@ void Read()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void While()
 {
 	if (printSwitch)
 		oftrace << "\t<While> ::= while (<Condition>) <Statement>\n";
 
+	tempInstructionNumber = currentInstructionNumber;               //*
+	generateInstruction("LABEL", NULL);                             //*
 	lexAdv();
 	if (currentToken.lexeme == "(")
 	{
@@ -664,8 +675,10 @@ void While()
 		Condition();
 		if (currentToken.lexeme == ")")
 		{
-			lexAdv();
+			//lexAdv();                                             //*
 			Statement();
+			generateInstruction("JUMP", tempInstructionNumber);     //*
+			backPatch(currentInstructionNumber);                    //*
 		}
 	}
 }
@@ -710,15 +723,24 @@ void Expression()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void ExpressionPrime()
 {
 	if (printSwitch)
 		oftrace << "\t<Expression Prime> ::= + <Term> <Expression Prime> | - <Term> <Expression Prime> | <Empty>\n";
 
-	if (currentToken.lexeme == "+" || currentToken.lexeme == "-")
+	if (currentToken.lexeme == "+") //|| currentToken.lexeme == "-")
 	{
 		lexAdv();
 		Term();
+		generateInstruction("ADD", NULL);                           //*
+		ExpressionPrime();
+	}
+	else if (currentToken.lexeme == "-")
+	{
+		lexAdv();
+		Term();
+		generateInstruction("SUB", NULL);                           //*
 		ExpressionPrime();
 	}
 	else if (currentToken.token == "UNKNOWN")
@@ -743,18 +765,26 @@ void Term()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void TermPrime()
 {
 	if (printSwitch)
 		oftrace <<  "\t<Term Prime> ::= * <Factor> <Term Prime> | / <Factor> <Term Prime> | <Empty>\n";
 
-	if (currentToken.lexeme == "*" || currentToken.lexeme == "/")
+	if (currentToken.lexeme == "*") //|| currentToken.lexeme == "/")
 	{
 		lexAdv();
 		Factor();
+		generateInstruction("MUL", NULL);                           //*
 		TermPrime();
 	}
-	else if (currentToken.token == "UNKNOWN")
+	else if (currentToken.lexeme == "/")
+	{
+		lexAdv();
+		Factor();
+		generateInstruction("DIV", NULL);                           //*
+		TermPrime();
+	}else if (currentToken.token == "UNKNOWN")
 	{
 		oftrace << "\n<><><> Syntax Error, expecting '*', '/', or 'Empty' before '" << currentToken.lexeme << "' on line " << currentToken.lineNumber;
 		exit(1);
@@ -790,6 +820,7 @@ void Factor()
 }
 
 
+// *ADDED CODE FROM PROMPT
 void Primary()
 {
 	if (printSwitch)
@@ -797,6 +828,8 @@ void Primary()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
+		tempInstructionNumber = get_address(token);                 //*
+		generateInstruction("PUSHM", tempInstructionNumber);        //*
 		lexAdv();
 		if (currentToken.lexeme == "[")
 		{
@@ -858,4 +891,20 @@ void Empty()
 		oftrace << "\t<Empty> ::= epsilon\n";
 
 }
+
+void generateInstruction(string opCode, int memoryLocation)
+{
+	instructionTable[currentInstructionNumber].memoryLocation = currentInstructionNumber;
+	instructionTable[currentInstructionNumber].opCode = opCode;
+	instructionTable[currentInstructionNumber].memoryLocation = memoryLocation;
+	currentInstructionNumber++;
+}
+
+
+void backPatch(int jumpAddress)
+{
+	tempInstructionNumber = jumpStack.pop();
+	instructionTable[tempInstructionNumber].instructionNumber = jumpAddress;
+}
+
 
