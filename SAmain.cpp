@@ -43,9 +43,7 @@ void Primary();
 void Empty();
 void lexAdv();
 
-/*
- * TODO: We need to add our stacks and extra functions
- */
+
 
 int                     lineNumber = 0;
 int                     tokenIndex = 0;             //Index used to step through token vector
@@ -56,10 +54,12 @@ tokenData               currentToken;
 ifstream			    ifget;
 ofstream				oftrace;
 
+// ICG Additions
 int                     memoryAddress = 6000;
 stack<int>              theStack;
 stack<int>              jumpStack;
-
+vector<symbolData>      symbolTable;
+vector<assemblyCode>    instructionList;
 
 
 int main() 
