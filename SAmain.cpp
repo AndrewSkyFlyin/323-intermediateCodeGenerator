@@ -44,8 +44,9 @@ void Empty();
 void lexAdv();
 void generateInstruction(string opCode, int oprnd);
 void backPatch(int jumpAddress);
+int getAddress(string token);
+bool alreadyInSymbolTable(string symbolIdentifier);
 
-// TODO: Write a function to see if a particular identifier is already in the table
 // TODO: Write a function to print out all identifiers in the table
 
 
@@ -60,6 +61,7 @@ ofstream				    oftrace;
 
 // ICG Additions
 int                         memoryAddress = 6000;           // Physical memory address starts at 6000 and will get incremented when identifier gets placed in symbol table
+int                         tempAddress = 0;
 int                         tempInstructionNumber = 0;      // Temp place to hold the instruction number of an operation
 int                         currentInstructionNumber = 1;   // Instructions start from 1 and increment after instruction gets placed in instruction table
 stack<int>                  theStack;
@@ -390,7 +392,12 @@ void Qualifier()
 
 	if (currentToken.lexeme == "integer" || currentToken.lexeme == "true" 
 		|| currentToken.lexeme == "false" || currentToken.lexeme == "real" || currentToken.lexeme == "boolean")
+	{
+		symbolData tempSymbolData;
+		tempSymbolData.dataType = currentToken.lexeme;
+		symbolTable.push_back(tempSymbolData);
 		lexAdv();
+	}
 	else
 	{
 		oftrace << "\n<><><> Syntax Error, expecting 'integer', 'boolean', or 'real' before '" << currentToken.lexeme << "' on line " << currentToken.lineNumber;
@@ -406,6 +413,13 @@ void IDs()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
+		if (!alreadyInSymbolTable(currentToken.lexeme))
+		{
+			symbolTable.back().identifier = currentToken.lexeme;
+			symbolTable.back().memoryLocation = memoryAddress;
+			memoryAddress++;
+		}
+
 		lexAdv();
 		if (currentToken.lexeme == ",")
 		{
@@ -496,7 +510,7 @@ void Assign()
 		{
 			lexAdv();
 			Expression();
-			tempInstructionNumber = get_address(tempSaveToken);     //* Do we need to check if tempSaveToken is in the symbol table already?
+			tempAddress = getAddress(tempSaveToken);                // Checks symbol table if token is in there
 			generateInstruction("POPM", tempInstructionNumber);     //*
 			if (currentToken.lexeme == ";")
 				lexAdv();
@@ -872,7 +886,7 @@ void Primary()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		tempInstructionNumber = get_address(currentToken);          //*
+		tempInstructionNumber = getAddress(currentToken.token);          //*
 		generateInstruction("PUSHM", tempInstructionNumber);        //*
 		lexAdv();
 		if (currentToken.lexeme == "[")
@@ -947,8 +961,30 @@ void generateInstruction(string opCode, int memoryLocation)
 
 void backPatch(int jumpAddress)
 {
-	tempInstructionNumber = jumpStack.pop();
-	instructionTable[tempInstructionNumber].instructionNumber = jumpAddress;
+	tempAddress = jumpStack.top();
+	jumpStack.pop();
+	instructionTable[tempAddress - 1].memoryLocation = jumpAddress; //not sure if -1 is needed
 }
 
 
+int getAddress(string token)
+{
+	for (int i = 0; i < symbolTable.size(); i++)
+	{
+		if (token == symbolTable.at(i).identifier)
+			return symbolTable.at(i).memoryLocation;
+	}
+	oftrace << "\n<><><> Error, undeclared variable used.";
+	exit(-1);
+}
+
+
+bool alreadyInSymbolTable(string symbolIdentifier)
+{
+	for (int i = 0; i < symbolTable.size(); i++)
+	{
+		if (symbolTable[i].identifier == symbolIdentifier)
+			return true;
+	}
+	return false;
+}

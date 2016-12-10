@@ -13,6 +13,7 @@ Assignment 3 - Intermediate Code Generator
 #include <cstdlib>
 #include <iomanip>
 #include <stack>
+#include <algorithm>
 using namespace std;
 
 
