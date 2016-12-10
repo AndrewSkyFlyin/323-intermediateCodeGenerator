@@ -414,7 +414,7 @@ void IDs()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		if (!alreadyInSymbolTable(currentToken.lexeme))                     // TODO: fails on source code read(max) because max is already in symbolTable
+		if (!alreadyInSymbolTable(currentToken.lexeme))
 		{
 			addDataTypeToSymbolTable(tempSaveToken);
 			symbolTable.back().identifier = currentToken.lexeme;                                                        //Changes the first item in symbol table rather than adding a new one
@@ -762,7 +762,7 @@ void Relop()
 	if (currentToken.lexeme == "=" || currentToken.lexeme == "/=" || currentToken.lexeme == ">"
 		|| currentToken.lexeme == "<" || currentToken.lexeme == "=>" || currentToken.lexeme == "<=")
 	{
-		tempSaveToken = currentToken.token;                     // TODO: change to currentToken.lexeme
+		tempSaveToken = currentToken.lexeme;
 		lexAdv();
 	}
 	else
@@ -960,13 +960,6 @@ void generateInstruction(string opCode, int memoryLocation)
 	tempInstructionData.memoryLocation = memoryLocation;
 	instructionTable.push_back(tempInstructionData);
 	currentInstructionNumber++;
-
-	/*
-	instructionTable[currentInstructionNumber].memoryLocation = currentInstructionNumber;                               // TODO: Program quits here
-	instructionTable[currentInstructionNumber].opCode = opCode;
-	instructionTable[currentInstructionNumber].memoryLocation = memoryLocation;
-	currentInstructionNumber++;
-	 */
 }
 
 
