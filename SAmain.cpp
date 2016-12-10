@@ -44,8 +44,10 @@ void Empty();
 void lexAdv();
 void generateInstruction(string opCode, int oprnd);
 void backPatch(int jumpAddress);
+void addDataTypeToSymbolTable(string dataType);
 int getAddress(string token);
 bool alreadyInSymbolTable(string symbolIdentifier);
+
 
 // TODO: Write a function to print out all identifiers in the table
 
@@ -79,7 +81,7 @@ int main()
 	string				    infilepath = "";
 	string				    outfilepath = "";
 	
-	
+/*
 	//Input file to read from
 	cout << "Before you begin, make sure the input test file is in\nthe same folder as the .exe of this program.\n";
 	cout << "----------------------------------------------------------------------\n";
@@ -93,15 +95,15 @@ int main()
 	cout << "Input: ";
 	getline(cin, outfilepath);
 	cout << "You entered: " << outfilepath << endl << endl;
-	
+*/
 
 
 	ifget.open(infilepath);
 	oftrace.open(outfilepath);
 
-	//infilepath = "/home/joshua/Git/323-syntaxAnalyzer/input.txt";
-	//outfilepath = "/home/joshua/Git/323-syntaxAnalyzer/output.txt";
-	//ifget.open(infilepath);
+	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
+	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
+	ifget.open(infilepath);
 
 
 	//Catch issue with opening file
@@ -345,7 +347,7 @@ void OptDecList()
 
 	if (currentToken.lexeme == "{")
 		Empty();
-	else if (currentToken.lexeme == "integer" || currentToken.lexeme == "boolean" || currentToken.lexeme == "real")
+	else if (currentToken.lexeme == "integer" || currentToken.lexeme == "boolean")  // || currentToken.lexeme == "real")
 		DecList();
 	else
 	{
@@ -364,7 +366,7 @@ void DecList()
 		if (currentToken.lexeme == ";")
 		{
 			lexAdv();
-			if (currentToken.lexeme == "integer" || currentToken.lexeme == "boolean" || currentToken.lexeme == "real")
+			if (currentToken.lexeme == "integer" || currentToken.lexeme == "boolean")   // || currentToken.lexeme == "real")
 				DecList();
 		}
 		else
@@ -391,11 +393,10 @@ void Qualifier()
 		oftrace << "\t<Qualifier> ::= integer | boolean | real\n";
 
 	if (currentToken.lexeme == "integer" || currentToken.lexeme == "true" 
-		|| currentToken.lexeme == "false" || currentToken.lexeme == "real" || currentToken.lexeme == "boolean")
+		|| currentToken.lexeme == "false" || currentToken.lexeme == "boolean")  // || currentToken.lexeme == "real"
 	{
-		symbolData tempSymbolData;
-		tempSymbolData.dataType = currentToken.lexeme;
-		symbolTable.push_back(tempSymbolData);
+		tempSaveToken = currentToken.lexeme;
+		//addDataTypeToSymbolTable(tempSaveToken);
 		lexAdv();
 	}
 	else
@@ -413,9 +414,10 @@ void IDs()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		if (!alreadyInSymbolTable(currentToken.lexeme))
+		if (!alreadyInSymbolTable(currentToken.lexeme))                     // TODO: fails on source code read(max) because max is already in symbolTable
 		{
-			symbolTable.back().identifier = currentToken.lexeme;
+			addDataTypeToSymbolTable(tempSaveToken);
+			symbolTable.back().identifier = currentToken.lexeme;                                                        //Changes the first item in symbol table rather than adding a new one
 			symbolTable.back().memoryLocation = memoryAddress;
 			memoryAddress++;
 		}
@@ -504,14 +506,14 @@ void Assign()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		tempSaveToken = currentToken.token;                         //*
+		tempSaveToken = currentToken.lexeme;                         //*
 		lexAdv();
 		if (currentToken.lexeme == ":=")
 		{
 			lexAdv();
 			Expression();
 			tempAddress = getAddress(tempSaveToken);                // Checks symbol table if token is in there
-			generateInstruction("POPM", tempInstructionNumber);     //*
+			generateInstruction("POPM", tempAddress);     //*         TODO: We are missing PUSHI instruction
 			if (currentToken.lexeme == ";")
 				lexAdv();
 			else
@@ -760,7 +762,7 @@ void Relop()
 	if (currentToken.lexeme == "=" || currentToken.lexeme == "/=" || currentToken.lexeme == ">"
 		|| currentToken.lexeme == "<" || currentToken.lexeme == "=>" || currentToken.lexeme == "<=")
 	{
-		tempSaveToken = currentToken.token;
+		tempSaveToken = currentToken.token;                     // TODO: change to currentToken.lexeme
 		lexAdv();
 	}
 	else
@@ -886,7 +888,7 @@ void Primary()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		tempInstructionNumber = getAddress(currentToken.token);          //*
+		tempInstructionNumber = getAddress(currentToken.lexeme);          //*
 		generateInstruction("PUSHM", tempInstructionNumber);        //*
 		lexAdv();
 		if (currentToken.lexeme == "[")
@@ -952,10 +954,19 @@ void Empty()
 
 void generateInstruction(string opCode, int memoryLocation)
 {
-	instructionTable[currentInstructionNumber].memoryLocation = currentInstructionNumber;
+	instructionData tempInstructionData;
+	tempInstructionData.instructionNumber = currentInstructionNumber;
+	tempInstructionData.opCode = opCode;
+	tempInstructionData.memoryLocation = memoryLocation;
+	instructionTable.push_back(tempInstructionData);
+	currentInstructionNumber++;
+
+	/*
+	instructionTable[currentInstructionNumber].memoryLocation = currentInstructionNumber;                               // TODO: Program quits here
 	instructionTable[currentInstructionNumber].opCode = opCode;
 	instructionTable[currentInstructionNumber].memoryLocation = memoryLocation;
 	currentInstructionNumber++;
+	 */
 }
 
 
@@ -988,3 +999,13 @@ bool alreadyInSymbolTable(string symbolIdentifier)
 	}
 	return false;
 }
+
+
+void addDataTypeToSymbolTable(string dataType)
+{
+	symbolData tempSymbolData;
+	tempSymbolData.dataType = dataType;
+	symbolTable.push_back(tempSymbolData);
+}
+
+
