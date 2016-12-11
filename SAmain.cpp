@@ -83,7 +83,7 @@ int main()
 	string				    infilepath = "";
 	string				    outfilepath = "";
 	
-/*
+
 	//Input file to read from
 	cout << "Before you begin, make sure the input test file is in\nthe same folder as the .exe of this program.\n";
 	cout << "----------------------------------------------------------------------\n";
@@ -97,12 +97,6 @@ int main()
 	cout << "Input: ";
 	getline(cin, outfilepath);
 	cout << "You entered: " << outfilepath << endl << endl;
-*/
-
-	infilepath = "input.txt";
-	outfilepath = "output.txt";
-	//infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
-	//outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
 
 
 	ifget.open(infilepath);
@@ -1027,7 +1021,7 @@ int getAddress(string token)
 		if (token == symbolTable.at(i).identifier)
 			return symbolTable.at(i).memoryLocation;
 	}
-	oftrace << "<><><> Error, undeclared variable '" << currentToken.lexeme << "' used on line " << currentToken.lineNumber << ". The program will now exit. <><><>\n";
+	oftrace << "<><><> Error, undeclared variable used on line " << currentToken.lineNumber << ". The program will now exit. <><><>\n";
 	exit(-1);
 }
 
@@ -1077,8 +1071,33 @@ void printAssemblyCode(vector<instructionData> &instructions, string filePath)
 
 	for (int i = 0; i < instructions.size(); i++)
 	{
-		fout << left << setw(6) << instructions[i].instructionNumber << left << setw(10) <<
-			instructions[i].opCode << left << setw(7) << instructions[i].memoryLocation << endl;
+		fout << left << setw(6) << instructions[i].instructionNumber << left << setw(10) << instructions[i].opCode;
+
+		if (instructions[i].opCode.compare("LES") != 0 && instructions[i].opCode.compare("GTR") != 0 &&
+		    instructions[i].opCode.compare("STDOUT") != 0 && instructions[i].opCode.compare("STDIN") != 0 &&
+		    instructions[i].opCode.compare("ADD") != 0 && instructions[i].opCode.compare("SUB") != 0 &&
+			instructions[i].opCode.compare("DIV") != 0 && instructions[i].opCode.compare("MUL") != 0 &&
+			instructions[i].opCode.compare("GET") != 0 && instructions[i].opCode.compare("LET") != 0 &&
+			instructions[i].opCode.compare("EQU") != 0 && instructions[i].opCode.compare("NEQ") != 0 &&
+			instructions[i].opCode.compare("LABLE") != 0)
+		{
+			fout << left << setw(7) << instructions[i].memoryLocation << endl;
+		}
+
+		else
+			fout << endl;
+
+
+
+/*
+		if (instructions[i].opCode == "ADD")
+			fout << left << setw(6) << instructions[i].instructionNumber << left << setw(10) << instructions[i].opCode << endl;
+		else
+		{
+			fout << left << setw(6) << instructions[i].instructionNumber << left << setw(10) <<
+				instructions[i].opCode << left << setw(7) << instructions[i].memoryLocation << endl;
+		}
+*/
 	}
 
 	fout.close();
