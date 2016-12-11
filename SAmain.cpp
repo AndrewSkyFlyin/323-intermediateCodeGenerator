@@ -102,10 +102,10 @@ int main()
 	ifget.open(infilepath);
 	oftrace.open(outfilepath);
 
-	//infilepath = "input.txt";
-	//outfilepath = "output.txt";
-	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
-	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
+	infilepath = "input.txt";
+	outfilepath = "output.txt";
+	//infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
+	//outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
 	ifget.open(infilepath);
 
 
@@ -627,7 +627,7 @@ void Write()
 	if (printSwitch)
 		oftrace << "\t<Write> ::= print (<Expressions>);\n";
 
-	generateInstruction("STDOUT", 0);
+	//generateInstruction("STDOUT", 0);
 	lexAdv();
 	if (currentToken.lexeme == "(")
 	{
@@ -637,7 +637,10 @@ void Write()
 		{
 			lexAdv();
 			if (currentToken.lexeme == ";")
+			{
+				generateInstruction("STDOUT", 0);
 				lexAdv();
+			}
 			else
 			{
 				oftrace << "\n<><><> Syntax Error, expecting ';' before '" << currentToken.lexeme << "' on line " << currentToken.lineNumber;
