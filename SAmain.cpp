@@ -99,10 +99,10 @@ int main()
 	cout << "You entered: " << outfilepath << endl << endl;
 */
 
-	//infilepath = "input2.txt";
-	//outfilepath = "output.txt";
-	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
-	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
+	infilepath = "input.txt";
+	outfilepath = "output.txt";
+	//infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
+	//outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
 
 
 	ifget.open(infilepath);
@@ -166,7 +166,6 @@ void Rat16F()
 		OptFuncDef();
 		if (currentToken.lexeme == "$$")
 		{
-			//SymbolInsertDone = true;
 			lexAdv();
 			OptDecList();
 			SymbolInsertDone = true;
