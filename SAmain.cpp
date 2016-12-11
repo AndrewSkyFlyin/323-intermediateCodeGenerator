@@ -103,10 +103,10 @@ int main()
 	ifget.open(infilepath);
 	oftrace.open(outfilepath);
 
-	//infilepath = "input2.txt";
-	//outfilepath = "output.txt";
-	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
-	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
+	infilepath = "input.txt";
+	outfilepath = "output.txt";
+	//infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
+	//outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
 	ifget.open(infilepath);
 
 
@@ -167,9 +167,10 @@ void Rat16F()
 		OptFuncDef();
 		if (currentToken.lexeme == "$$")
 		{
-			SymbolInsertDone = true;
+			//SymbolInsertDone = true;
 			lexAdv();
 			OptDecList();
+			SymbolInsertDone = true;
 			StatementList();
 			if (currentToken.lexeme != "$$")
 				//oftrace << "The End.\n";
@@ -421,14 +422,24 @@ void IDs()
 
 	if (currentToken.token == "IDENTIFIER")
 	{
-		if (!alreadyInSymbolTable(currentToken.lexeme))
+		if (!SymbolInsertDone)
 		{
-			addDataTypeToSymbolTable(tempSaveToken);
-			symbolTable.back().identifier = currentToken.lexeme;                                                        //Changes the first item in symbol table rather than adding a new one
-			symbolTable.back().memoryLocation = memoryAddress;
-			memoryAddress++;
+			if (!alreadyInSymbolTable(currentToken.lexeme))
+			{
+				addDataTypeToSymbolTable(tempSaveToken);
+				symbolTable.back().identifier = currentToken.lexeme;                                                        //Changes the first item in symbol table rather than adding a new one
+				symbolTable.back().memoryLocation = memoryAddress;
+				memoryAddress++;
+			}
+			else if (alreadyInSymbolTable(currentToken.lexeme))
+			{
+				cout << "\n<><><> Redeclaration error: " << currentToken.lexeme << endl;
+				system("pause");
+				exit(1);
+			}
 		}
-		else if (alreadyInSymbolTable(currentToken.lexeme) && SymbolInsertDone)
+		
+		if (SymbolInsertDone)
 		{
 			generateInstruction("POPM", getAddress(currentToken.lexeme));
 		}
@@ -1028,7 +1039,7 @@ bool alreadyInSymbolTable(string symbolIdentifier)
 {
 	for (int i = 0; i < symbolTable.size(); i++)
 	{
-		if (symbolTable[i].identifier == symbolIdentifier)
+		if (symbolTable[i].identifier.compare(symbolIdentifier) == 0)
 			return true;
 	}
 	return false;
