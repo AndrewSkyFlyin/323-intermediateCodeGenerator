@@ -1,0 +1,33 @@
+Identifiers in Symbol Table:
+
+a   6000
+b   6001
+c   6002
+
+
+
+Assembly Code:
+
+1     PUSHI          4      
+2     POPM           6000   
+3     PUSHI          8      
+4     POPM           6001   
+5     PUSHI          7      
+6     POPM           6002   
+7     PUSHM          6001   
+8     PUSHM          6000   
+9     POPM           9      
+10    POPM           11     
+11    PUSHM          11     
+12    PUSHM          13     
+13    LES            0      
+14    JUMPZ          16     
+15    JUMP           20     
+16    PUSHM          16     
+17    PUSHM          18     
+18    EQU            0      
+19    JUMPZ          24     
+20    PUSHM          6002   
+21    PUSHM          6001   
+22    ADD            0      
+23    POPM           6000   

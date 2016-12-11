@@ -26,6 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt" />
+    <Text Include="input2.txt" />
+    <Text Include="output.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\WatchOutput.png" />

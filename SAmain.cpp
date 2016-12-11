@@ -742,8 +742,11 @@ void Condition()
 	}
 	else if (tempSaveToken == "/=" || tempSaveToken == "!=")
 	{
-		generateInstruction("NEQ", NULL);
-		// TODO:
+		generateInstruction("EQU", 0);
+		generateInstruction("PUSHI", 0);
+		generateInstruction("EQU", 0);
+		jumpStack.push(currentInstructionNumber);
+		generateInstruction("JUMPZ", 0);
 	}
 	else if (tempSaveToken == ">")
 	{
@@ -759,13 +762,33 @@ void Condition()
 	}
 	else if (tempSaveToken == "=>")
 	{
-		generateInstruction("GET", NULL);
-		// TODO:
+		generateInstruction("POPM", currentInstructionNumber);
+		generateInstruction("POPM", currentInstructionNumber + 1);
+		generateInstruction("PUSHM", currentInstructionNumber);
+		generateInstruction("PUSHM", currentInstructionNumber + 1);
+		generateInstruction("GRT", 0);
+		generateInstruction("JUMPZ", currentInstructionNumber + 2);
+		generateInstruction("JUMP", currentInstructionNumber + 5);
+		generateInstruction("PUSHM", currentInstructionNumber);
+		generateInstruction("PUSHM", currentInstructionNumber + 1);
+		generateInstruction("EQU", 0);
+		jumpStack.push(currentInstructionNumber);
+		generateInstruction("JUMPZ", 0);
 	}
 	else if (tempSaveToken == "<=")
 	{
-		generateInstruction("LET", NULL);
-		// TODO:
+		generateInstruction("POPM", currentInstructionNumber);
+		generateInstruction("POPM", currentInstructionNumber + 1);
+		generateInstruction("PUSHM", currentInstructionNumber);
+		generateInstruction("PUSHM", currentInstructionNumber + 1);
+		generateInstruction("LES", 0);
+		generateInstruction("JUMPZ", currentInstructionNumber + 2);
+		generateInstruction("JUMP", currentInstructionNumber + 5);
+		generateInstruction("PUSHM", currentInstructionNumber);
+		generateInstruction("PUSHM", currentInstructionNumber + 1);
+		generateInstruction("EQU", 0);
+		jumpStack.push(currentInstructionNumber);
+		generateInstruction("JUMPZ", 0);
 	}
 }
 
@@ -1029,7 +1052,8 @@ void printSymbolTable(vector<symbolData> &table, string filePath)
 
 	for (int i = 0; i < table.size(); i++)
 	{
-		fout << table[i].identifier << endl;
+		fout << left << setw(4) << table[i].identifier <<
+			left << setw(4) << table[i].memoryLocation << endl;
 	}
 
 	fout.close();
@@ -1045,7 +1069,8 @@ void printAssemblyCode(vector<instructionData> &instructions, string filePath)
 
 	for (int i = 0; i < instructions.size(); i++)
 	{
-		fout << left << setw(15) << instructions[i].opCode << left << setw(7) << instructions[i].memoryLocation << endl;
+		fout << left << setw(6) << instructions[i].instructionNumber << left << setw(15) << 
+			instructions[i].opCode << left << setw(7) << instructions[i].memoryLocation << endl;
 	}
 
 	fout.close();
