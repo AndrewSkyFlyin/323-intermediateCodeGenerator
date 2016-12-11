@@ -45,11 +45,13 @@ void lexAdv();
 void generateInstruction(string opCode, int oprnd);
 void backPatch(int jumpAddress);
 void addDataTypeToSymbolTable(string dataType);
+void printSymbolTable(vector<symbolData> &table, string filePath);
+void printAssemblyCode(vector<instructionData> &instructions, string filePath);
 int getAddress(string token);
 bool alreadyInSymbolTable(string symbolIdentifier);
 
 
-// TODO: Write a function to print out all identifiers in the table
+// TODO: Remove all 0 from Assembly Code output and replace with blank space
 
 
 bool                        printSwitch = false;
@@ -66,8 +68,7 @@ int                         memoryAddress = 6000;           // Physical memory a
 int                         tempAddress = 0;
 int                         tempInstructionNumber = 0;      // Temp place to hold the instruction number of an operation
 int                         currentInstructionNumber = 1;   // Instructions start from 1 and increment after instruction gets placed in instruction table
-stack<int>                  theStack;
-stack<int>                  jumpStack;                      // TODO: Need to figure out the stack situation
+stack<int>                  jumpStack;
 string                      tempSaveToken;
 vector<symbolData>          symbolTable;
 vector<instructionData>     instructionTable;
@@ -86,7 +87,7 @@ int main()
 	//Input file to read from
 	cout << "Before you begin, make sure the input test file is in\nthe same folder as the .exe of this program.\n";
 	cout << "----------------------------------------------------------------------\n";
-	cout << "Please enter the file name and extension of the input file (input.txt).\n";
+	cout << "Please enter the file name and extension of the input file (input2.txt).\n";
 	cout << "Input: ";
 	getline(cin, infilepath);
 	cout << "You entered: " << infilepath << endl << endl;
@@ -102,10 +103,10 @@ int main()
 	ifget.open(infilepath);
 	oftrace.open(outfilepath);
 
-	infilepath = "input.txt";
-	outfilepath = "output.txt";
-	//infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
-	//outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
+	//infilepath = "input2.txt";
+	//outfilepath = "output.txt";
+	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
+	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
 	ifget.open(infilepath);
 
 
@@ -132,6 +133,8 @@ int main()
 
 	Rat16F();
 	oftrace.close();
+	printSymbolTable(symbolTable, outfilepath);
+	printAssemblyCode(instructionTable, outfilepath);
 	cout << "Results printed in output file.\n";
 	system("pause");
 	return 0;
@@ -731,7 +734,6 @@ void Condition()
 	Relop();
 	Expression();
 
-	// TODO: Need to finish filling this out
 	if (tempSaveToken == "=")
 	{
 		generateInstruction("EQU", NULL);
@@ -741,7 +743,7 @@ void Condition()
 	else if (tempSaveToken == "/=" || tempSaveToken == "!=")
 	{
 		generateInstruction("NEQ", NULL);
-
+		// TODO:
 	}
 	else if (tempSaveToken == ">")
 	{
@@ -758,12 +760,12 @@ void Condition()
 	else if (tempSaveToken == "=>")
 	{
 		generateInstruction("GET", NULL);
-
+		// TODO:
 	}
 	else if (tempSaveToken == "<=")
 	{
 		generateInstruction("LET", NULL);
-
+		// TODO:
 	}
 }
 
@@ -1015,6 +1017,38 @@ void addDataTypeToSymbolTable(string dataType)
 	symbolData tempSymbolData;
 	tempSymbolData.dataType = dataType;
 	symbolTable.push_back(tempSymbolData);
+}
+
+
+void printSymbolTable(vector<symbolData> &table, string filePath)
+{
+	ofstream    fout;
+	fout.open(filePath);
+
+	fout << "Identifiers in Symbol Table:\n\n";
+
+	for (int i = 0; i < table.size(); i++)
+	{
+		fout << table[i].identifier << endl;
+	}
+
+	fout.close();
+}
+
+
+void printAssemblyCode(vector<instructionData> &instructions, string filePath)
+{
+	ofstream    fout;
+	fout.open(filePath, ios_base::app);
+
+	fout << "\n\n\nAssembly Code:\n\n";
+
+	for (int i = 0; i < instructions.size(); i++)
+	{
+		fout << left << setw(15) << instructions[i].opCode << left << setw(7) << instructions[i].memoryLocation << endl;
+	}
+
+	fout.close();
 }
 
 
