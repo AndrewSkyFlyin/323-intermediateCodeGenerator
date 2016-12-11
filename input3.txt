@@ -1,0 +1,26 @@
+$$
+$$
+integer c;
+boolean yes, no;
+
+c := 7;
+yes := true;
+no := false;
+
+if(c /= 9)
+{
+    return yes;
+}
+endif
+
+while(no = true) {
+    c := c + 1;
+    if(c = 10)
+    {
+        no := true;
+    }
+    endif
+}
+print(c);
+
+$$

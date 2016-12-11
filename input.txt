@@ -1,7 +1,6 @@
 $$
 $$
 integer i, max, sum;
-
 sum := 0;
 i := 1;
 read(max);
