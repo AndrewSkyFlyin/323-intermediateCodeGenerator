@@ -24,6 +24,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\SAmain.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="input.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\WatchOutput.png" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B84EB9EB-67CC-4340-A9B6-FD50B0716A18}</ProjectGuid>
     <RootNamespace>intermediateCodeGenerator</RootNamespace>

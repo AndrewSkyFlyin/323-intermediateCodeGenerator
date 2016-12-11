@@ -71,6 +71,7 @@ stack<int>                  jumpStack;                      // TODO: Need to fig
 string                      tempSaveToken;
 vector<symbolData>          symbolTable;
 vector<instructionData>     instructionTable;
+bool						SymbolInsertDone = false;
 
 
 
@@ -101,6 +102,8 @@ int main()
 	ifget.open(infilepath);
 	oftrace.open(outfilepath);
 
+	//infilepath = "input.txt";
+	//outfilepath = "output.txt";
 	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
 	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
 	ifget.open(infilepath);
@@ -161,6 +164,7 @@ void Rat16F()
 		OptFuncDef();
 		if (currentToken.lexeme == "$$")
 		{
+			SymbolInsertDone = true;
 			lexAdv();
 			OptDecList();
 			StatementList();
@@ -421,6 +425,10 @@ void IDs()
 			symbolTable.back().memoryLocation = memoryAddress;
 			memoryAddress++;
 		}
+		else if (alreadyInSymbolTable(currentToken.lexeme) && SymbolInsertDone)
+		{
+			generateInstruction("POPM", getAddress(currentToken.lexeme));
+		}
 
 		lexAdv();
 		if (currentToken.lexeme == ",")
@@ -475,6 +483,8 @@ void Statement()
 		While();
 	else
 	{
+		cout << "??? Statement error\n";
+		system("pause");
 		oftrace << "\n<><><> Syntax Error, expecting proper '<Statement>' before '" << currentToken.lexeme << "' on line " << currentToken.lineNumber;
 		exit(1);
 	}
@@ -513,7 +523,7 @@ void Assign()
 			lexAdv();
 			Expression();
 			tempAddress = getAddress(tempSaveToken);                // Checks symbol table if token is in there
-			generateInstruction("POPM", tempAddress);     //*         TODO: We are missing PUSHI instruction
+			generateInstruction("POPM", tempAddress);     //*
 			if (currentToken.lexeme == ";")
 				lexAdv();
 			else
@@ -617,6 +627,7 @@ void Write()
 	if (printSwitch)
 		oftrace << "\t<Write> ::= print (<Expressions>);\n";
 
+	generateInstruction("STDOUT", 0);
 	lexAdv();
 	if (currentToken.lexeme == "(")
 	{
@@ -652,6 +663,7 @@ void Read()
 	if (printSwitch)
 		oftrace << "\t<Read> ::= read (<IDs>);\n";
 
+	generateInstruction("STDIN", 0);
 	lexAdv();
 	if (currentToken.lexeme == "(")
 	{
@@ -688,7 +700,7 @@ void While()
 	if (printSwitch)
 		oftrace << "\t<While> ::= while (<Condition>) <Statement>\n";
 
-	tempInstructionNumber = currentInstructionNumber;               //*
+	int tempLocalInstructAddress = currentInstructionNumber;               //*
 	generateInstruction("LABEL", NULL);                             //*
 	lexAdv();
 	if (currentToken.lexeme == "(")
@@ -697,10 +709,10 @@ void While()
 		Condition();
 		if (currentToken.lexeme == ")")
 		{
-			//lexAdv();                                             //*
+			lexAdv();                                                  //*
 			Statement();
-			generateInstruction("JUMP", tempInstructionNumber);     //*
-			backPatch(currentInstructionNumber);                    //*
+			generateInstruction("JUMP", tempLocalInstructAddress);     //*
+			backPatch(currentInstructionNumber);                       //*
 		}
 	}
 }
@@ -915,6 +927,7 @@ void Primary()
 	
 	else if (currentToken.token == "INTEGER" || currentToken.token == "REAL")
 	{
+		generateInstruction("PUSHI", stoi(currentToken.lexeme));
 		lexAdv();
 	}
 	
