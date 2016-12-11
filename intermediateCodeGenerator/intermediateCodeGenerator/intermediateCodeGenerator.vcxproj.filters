@@ -34,6 +34,9 @@
     <Text Include="output.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="input3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\WatchOutput.png">

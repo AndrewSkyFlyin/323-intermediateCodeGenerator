@@ -1059,7 +1059,7 @@ void printAssemblyCode(vector<instructionData> &instructions, string filePath)
 			instructions[i].opCode.compare("DIV") != 0 && instructions[i].opCode.compare("MUL") != 0 &&
 			instructions[i].opCode.compare("GET") != 0 && instructions[i].opCode.compare("LET") != 0 &&
 			instructions[i].opCode.compare("EQU") != 0 && instructions[i].opCode.compare("NEQ") != 0 &&
-			instructions[i].opCode.compare("LABLE") != 0)
+			instructions[i].opCode.compare("LABEL") != 0)
 		{
 			fout << left << setw(7) << instructions[i].memoryLocation << endl;
 		}
