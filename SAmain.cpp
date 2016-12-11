@@ -99,15 +99,14 @@ int main()
 	cout << "You entered: " << outfilepath << endl << endl;
 */
 
-
-	ifget.open(infilepath);
-	oftrace.open(outfilepath);
-
 	//infilepath = "input2.txt";
 	//outfilepath = "output.txt";
 	infilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/input.txt";
 	outfilepath = "/home/joshua/Git/323-intermediateCodeGenerator/cmake-build-debug/output.txt";
+
+
 	ifget.open(infilepath);
+	oftrace.open(outfilepath);
 
 
 	//Catch issue with opening file
@@ -403,7 +402,6 @@ void Qualifier()
 		|| currentToken.lexeme == "false" || currentToken.lexeme == "boolean")  // || currentToken.lexeme == "real"
 	{
 		tempSaveToken = currentToken.lexeme;
-		//addDataTypeToSymbolTable(tempSaveToken);
 		lexAdv();
 	}
 	else
@@ -707,7 +705,7 @@ void While()
 		oftrace << "\t<While> ::= while (<Condition>) <Statement>\n";
 
 	int tempLocalInstructAddress = currentInstructionNumber;               //*
-	generateInstruction("LABEL", NULL);                             //*
+	generateInstruction("LABEL", 0);                             //*
 	lexAdv();
 	if (currentToken.lexeme == "(")
 	{
@@ -736,9 +734,9 @@ void Condition()
 
 	if (tempSaveToken == "=")
 	{
-		generateInstruction("EQU", NULL);
+		generateInstruction("EQU", 0);
 		jumpStack.push(currentInstructionNumber);
-		generateInstruction("JUMPZ", NULL);
+		generateInstruction("JUMPZ", 0);
 	}
 	else if (tempSaveToken == "/=" || tempSaveToken == "!=")
 	{
@@ -750,15 +748,15 @@ void Condition()
 	}
 	else if (tempSaveToken == ">")
 	{
-		generateInstruction("GTR", NULL);
+		generateInstruction("GTR", 0);
 		jumpStack.push(currentInstructionNumber);
-		generateInstruction("JUMPZ", NULL);
+		generateInstruction("JUMPZ", 0);
 	}
 	else if (tempSaveToken == "<")
 	{
-		generateInstruction("LES", NULL);
+		generateInstruction("LES", 0);
 		jumpStack.push(currentInstructionNumber);
-		generateInstruction("JUMPZ", NULL);
+		generateInstruction("JUMPZ", 0);
 	}
 	else if (tempSaveToken == "=>")
 	{
@@ -833,14 +831,14 @@ void ExpressionPrime()
 	{
 		lexAdv();
 		Term();
-		generateInstruction("ADD", NULL);                           //*
+		generateInstruction("ADD", 0);                           //*
 		ExpressionPrime();
 	}
 	else if (currentToken.lexeme == "-")
 	{
 		lexAdv();
 		Term();
-		generateInstruction("SUB", NULL);                           //*
+		generateInstruction("SUB", 0);                           //*
 		ExpressionPrime();
 	}
 	else if (currentToken.token == "UNKNOWN")
@@ -875,14 +873,14 @@ void TermPrime()
 	{
 		lexAdv();
 		Factor();
-		generateInstruction("MUL", NULL);                           //*
+		generateInstruction("MUL", 0);                           //*
 		TermPrime();
 	}
 	else if (currentToken.lexeme == "/")
 	{
 		lexAdv();
 		Factor();
-		generateInstruction("DIV", NULL);                           //*
+		generateInstruction("DIV", 0);                           //*
 		TermPrime();
 	}else if (currentToken.token == "UNKNOWN")
 	{
@@ -1014,12 +1012,12 @@ void backPatch(int jumpAddress)
 
 int getAddress(string token)
 {
-	for (int i = 0; i < symbolTable.size(); i++)
+	for (unsigned long i = 0; i < symbolTable.size(); i++)
 	{
 		if (token == symbolTable.at(i).identifier)
 			return symbolTable.at(i).memoryLocation;
 	}
-	oftrace << "\n<><><> Error, undeclared variable used.";
+	oftrace << "<><><> Error, undeclared variable '" << currentToken.lexeme << "' used on line " << currentToken.lineNumber << ". The program will now exit. <><><>\n";
 	exit(-1);
 }
 
@@ -1052,7 +1050,7 @@ void printSymbolTable(vector<symbolData> &table, string filePath)
 
 	for (int i = 0; i < table.size(); i++)
 	{
-		fout << left << setw(4) << table[i].identifier <<
+		fout << left << setw(6) << table[i].identifier <<
 			left << setw(4) << table[i].memoryLocation << endl;
 	}
 
@@ -1069,7 +1067,7 @@ void printAssemblyCode(vector<instructionData> &instructions, string filePath)
 
 	for (int i = 0; i < instructions.size(); i++)
 	{
-		fout << left << setw(6) << instructions[i].instructionNumber << left << setw(15) << 
+		fout << left << setw(6) << instructions[i].instructionNumber << left << setw(10) <<
 			instructions[i].opCode << left << setw(7) << instructions[i].memoryLocation << endl;
 	}
 
